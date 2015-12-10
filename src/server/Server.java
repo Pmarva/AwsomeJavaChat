@@ -3,17 +3,17 @@ package server;
 import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
+import java.util.regex.Pattern;
 
 /**
  * Created by Marva on 09.11.2015.
  */
 public class Server {
 
-
     public static ArrayList<User> clients = new ArrayList<User>();
 
-
     public static void main(String[] args) throws Exception {
+
         ServerSocket serverSocket = new ServerSocket(6667, 100, InetAddress.getByName("Localhost"));
         System.out.println("Server started at:" + serverSocket);
 
@@ -31,118 +31,103 @@ public class Server {
         try {
             BufferedReader socketReader = new BufferedReader(new InputStreamReader(activeSocket.getInputStream()));
             BufferedWriter socketWriter = new BufferedWriter(new OutputStreamWriter(activeSocket.getOutputStream()));
-            User kasutaja = new User("GUEST", socketWriter);
-//             socketWriter.write("Sisestage kasutajanimi:");
-//            socketWriter.newLine();
-//            socketWriter.flush();
-//            String nimi = socketReader.readLine();
 
-            //socketWriter.write("Tere: " + kasutaja.toString());
-            //socketWriter.newLine();
-            //socketWriter.flush();
-            String teade = null;
-            String[] content = null;
+            User user = new User("GUEST", socketWriter);
+            String serverInetAddress = "127.0.0.1.server";
+            String clientIntetAddress = activeSocket.getInetAddress().getHostAddress().toString()+".client";
+            String input = null;
             String message;
 
-            while ((teade = socketReader.readLine()) != null) {
-                System.out.println(teade);
-                content = getPrefix(teade);
+            while ((input = socketReader.readLine()) != null) {
+                System.out.println(input);
 
-                if (content[0].equals("NICK")) {
-                    kasutaja = new User(content[1], socketWriter);
-                    clients.add(kasutaja);
-                    //String message = ":"+kasutaja+" MODE "+kasutaja+" :+i";
-                    //System.out.println(message);
-                    //kasutaja.sendMessage(message);
-                    message = ":127.0.0.1 001 " + kasutaja + " :Welcome to the fancy java IRC server chat";
-                    System.out.println(message);
-                    kasutaja.sendMessage(message);
-                } else if (content[0].equals("PING")) {
-                    String s = "PONG :" + content[1];
-                    kasutaja.sendMessage(s);
-                } else if (content[0].equals("JOIN")) {
+                String command = InputParse.getCommand(input);
+                String response = InputParse.getResponse(input);
 
-                    if (ChatRooms.ifChatRoomExists(content[1])) {
+                if (command.equals("NICK")) {
+                    user = new User(response, socketWriter);
+                    clients.add(user);
+                    message = ":" + serverInetAddress + " 001 " + user + " :Welcome to the fancy java IRC server chat";
+                    user.sendMessage(message);
+                    message = ":" + serverInetAddress + " 376 " + user + " :End of /MOTD command.";
+                    user.sendMessage(message);
+                } else if (command.equals("PING")) {
+                    String s = "PONG :" + response;
+                    user.sendMessage(s);
+                } else if (command.equals("JOIN")) {
+                    String channelName = InputParse.getChannelName(input);
+
+                    if (ChatRooms.ifExists(channelName)) {
+                        ChatRoom room = ChatRooms.getChatRoom(channelName);
                         System.out.println("VANA RUUM");
-                        ChatRoom room = ChatRooms.getChatRoom(content[1]);
                         String roomOwner = room.getOwner().toString();
-                        room.join(kasutaja);
-                        message = ":" + kasutaja + "!~" + kasutaja + "@127.0.0.1 JOIN " + content[1];
+                        room.join(user);
+                        message = ":" + user + "!~" + user + "@"+clientIntetAddress+" JOIN " + channelName;
                         System.out.println(message);
-                        kasutaja.sendMessage(message);
-                        message = ":127.0.0.1 353 " + kasutaja + " @ " + content[1] + " :" + room.getUsers() + "@" + roomOwner;
+                        user.sendMessage(message);
+                        message = ":" + serverInetAddress + " 353 " + user + " = " + channelName + " :" + room.getUsers(user) + " @" + roomOwner;
                         System.out.println(message);
-                        kasutaja.sendMessage(message);
-                        message = ":127.0.0.1 366 " + kasutaja + " " + content[1] + " :End of /NAMES list.";
+                        user.sendMessage(message);
+                        message = ":" + serverInetAddress + " " + user + " " + channelName + " :End of /NAMES list.";
                         System.out.println(message);
-                        kasutaja.sendMessage(message);
-                        message = ":" + kasutaja + "!~" + kasutaja + "@127.0.0.1 JOIN " + content[1];
-                        room.sendMessage(message, kasutaja);
+                        user.sendMessage(message);
+                        message = ":" + user + "!~" + user + "@"+clientIntetAddress+" JOIN " + channelName;
+                        room.sendMessage(message,user);
                     } else {
                         System.out.println("UUS RUUM");
-                        ChatRoom cR = ChatRooms.newChatRoom(content[1], kasutaja);
-                        cR.join(kasutaja);
+                        ChatRoom cR = ChatRooms.newChatRoom(channelName, user);
+                        cR.join(user);
 
-                        message = ":" + kasutaja + "!" + kasutaja + "@127.0.0.1 JOIN " + content[1];
+                        message = ":" + user + "!" + user + "@"+clientIntetAddress+" JOIN " + channelName;
                         System.out.println(message);
-                        kasutaja.sendMessage(message);
+                        user.sendMessage(message);
 
-                        message = ":127.0.0.1 MODE " + content[1] + " +ns";
+                        message = ":" + serverInetAddress + " MODE " + channelName + " +ns";
                         System.out.println(message);
-                        kasutaja.sendMessage(message);
+                        user.sendMessage(message);
 
-                        message = ":127.0.0.1 353 " + kasutaja + " @ " + content[1] + " :@" + kasutaja;
+                        message = ":" + serverInetAddress + " 353 " + user + " = " + channelName + " :@" + user;
                         System.out.println(message);
-                        kasutaja.sendMessage(message);
+                        user.sendMessage(message);
 
-                        message = ":127.0.0.1 366 " + kasutaja + " " + content[1] + " :End of /NAMES list.";
+                        message = ":" + serverInetAddress + " 366 " + user + " " + channelName + " :End of /NAMES list.";
                         System.out.println(message);
-                        kasutaja.sendMessage(message);
+                        user.sendMessage(message);
                     }
-                } else if (content[0].startsWith("PRIVMSG")) {
-                    String[] subContent = content[0].split(" ");
-                    String targetChatRoom = subContent[1].trim();
+                } else if (command.startsWith("PRIVMSG")) {
+
+                    String targetChatRoom = InputParse.getChannelName(input);
                     ChatRoom room = ChatRooms.getChatRoom(targetChatRoom);
-                    //message = :marva!~marva@39-97-106-194.dyn.estpak.ee PRIVMSG #laheRuum :tere mmehed
-                    message = ":" + kasutaja + "!~" + kasutaja + "@127.0.0.1 PRIVMSG " + targetChatRoom + " :" + content[1];
+                    message = ":" + user + "!~" + user + "@"+clientIntetAddress+" PRIVMSG " + targetChatRoom + " :" + response;
                     System.out.println(message);
-                    room.sendMessage(message, kasutaja);
-                } else if (content[0].equals("QUIT")) {
-                    message = ":" + kasutaja + "!~" + kasutaja + "@127.0.0.1 QUIT  :Quit:" + kasutaja;
+                    room.sendMessage(message, user);
 
+                } else if (command.equals("PART")) {
+
+                    String channelName = InputParse.getChannelName(input);
+                    ChatRoom room = ChatRooms.getChatRoom(channelName);
+                    message = ":" + user + "!~" + user + "@" + clientIntetAddress + " PART " + channelName + " :" + response;
+                    System.out.println(message);
+                    room.sendMessage(message);
+                    room.leave(user);
+
+                } else if (command.equals("QUIT")) {
+                    message = ":" + user + "!~" + user + "@"+clientIntetAddress+" QUIT  :Quit:" + response;
+                    ChatRooms.sendMessageToAll(message,user);
+                    message = "ERROR :Closing Link :"+clientIntetAddress+" (Quit: "+response+")";
+                    user.sendMessage(message);
+                    ChatRooms.removeUser(user);
+                    activeSocket.close();
                 }
-
-                // String message = "Message from " + kasutaja + ": " + teade;
-                //sendMessage(message, kasutaja);
-
             }
             activeSocket.close();
         } catch (SocketException e) {
             System.out.println("Klient lahkus");
+        } catch (IOException e) {
+            System.out.println("Klient lahkus");
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public static void sendMessage(String message, User client) {
-
-        for (User s : clients) {
-            if (s != client) {
-                s.sendMessage(message);
-            }
-        }
-    }
-
-    public static String[] getPrefix(String input) {
-        CharSequence cs = " :";
-        String[] s;
-
-        if (input.contains(cs)) {
-            s = input.split(" \\:");
-        } else {
-            s = input.split(" ");
-        }
-        return s;
     }
 }
 

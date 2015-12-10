@@ -24,7 +24,7 @@ public class ChatRooms {
         }
     }
 
-    public static boolean ifChatRoomExists(String name) {
+    public static boolean ifExists(String name) {
 
         for (ChatRoom room : chatRooms) {
             if (room.toString().equals(name)) {
@@ -41,6 +41,23 @@ public class ChatRooms {
             }
         }
         return null;
+    }
+
+    public static void sendMessageToAll(String message, User u) {
+
+          for (ChatRoom cr: chatRooms) {
+              if(cr.isJoined(u)) {
+                  cr.sendMessage(message);
+              }
+          }
+    }
+
+    public static void removeUser(User u) {
+        for (ChatRoom cr: chatRooms) {
+            if(cr.isJoined(u)) {
+                cr.leave(u);
+            }
+        }
     }
 
     public static void showChatRooms() {
