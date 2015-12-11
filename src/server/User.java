@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 /**
  * Created by Marva on 16.11.2015.
+ * class for holding user data
  */
 public class User {
     private String name=null;
@@ -16,6 +17,10 @@ public class User {
         this.socketWriter=socketWriter;
     }
 
+    /**
+     * Sendmessage to client
+     * @param message - The string sent to the client.
+     */
     public void sendMessage(String message) {
         try {
             socketWriter.write(message);
@@ -26,6 +31,11 @@ public class User {
         }
     }
 
+    /**
+     * Compare users
+     * @param o object should be User
+     * @return true if is that user else return false.
+     */
     @Override
     public boolean equals(Object o) {
         if (o == null) return false;
@@ -38,6 +48,10 @@ public class User {
         return false;
     }
 
+    /**
+     * Return user name. Object to string
+     * @return string user name.
+     */
     @Override
     public String toString() {
         return name;
