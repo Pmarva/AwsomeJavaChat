@@ -6,15 +6,19 @@ import java.util.ArrayList;
  * Created by marva on 3.12.15.
  */
 public class ChatRooms {
-    public static ArrayList<ChatRoom> chatRooms = new ArrayList<ChatRoom>();
+    private ArrayList<ChatRoom> chatRooms = new ArrayList<ChatRoom>();
 
-    public static ChatRoom newChatRoom(String name, User u) {
+    public ChatRooms() {
+
+    }
+
+    public ChatRoom newChatRoom(String name, User u) {
         ChatRoom cr = new ChatRoom(name, u);
         chatRooms.add(cr);
         return cr;
     }
 
-    public static void joinChatRoom(String chatroomName, User u) {
+    public void joinChatRoom(String chatroomName, User u) {
 
         for (ChatRoom cr : chatRooms) {
             if (cr.toString().equals(chatroomName)) {
@@ -24,7 +28,7 @@ public class ChatRooms {
         }
     }
 
-    public static boolean ifExists(String name) {
+    public boolean ifExists(String name) {
 
         for (ChatRoom room : chatRooms) {
             if (room.toString().equals(name)) {
@@ -34,7 +38,7 @@ public class ChatRooms {
         return false;
     }
 
-    public static ChatRoom getChatRoom(String name) {
+    public ChatRoom getChatRoom(String name) {
         for (ChatRoom room : chatRooms) {
             if (room.toString().equals(name)) {
                 return room;
@@ -43,7 +47,7 @@ public class ChatRooms {
         return null;
     }
 
-    public static void sendMessageToAll(String message, User u) {
+    public void sendMessageToAll(String message, User u) {
 
           for (ChatRoom cr: chatRooms) {
               if(cr.isJoined(u)) {
@@ -52,7 +56,7 @@ public class ChatRooms {
           }
     }
 
-    public static void removeUser(User u) {
+    public void removeUser(User u) {
         for (ChatRoom cr: chatRooms) {
             if(cr.isJoined(u)) {
                 cr.leave(u);
@@ -60,7 +64,7 @@ public class ChatRooms {
         }
     }
 
-    public static void showChatRooms() {
+    public void showChatRooms() {
         for (ChatRoom room : chatRooms) {
             System.out.println(room);
         }

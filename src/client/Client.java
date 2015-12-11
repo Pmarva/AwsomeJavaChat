@@ -33,7 +33,7 @@ public class Client extends Application {
             new Thread(runnable).start();
 
             //Thread.sleep(1000);
-            String teade = "NICK juta";
+            String teade = "NICK julla";
             System.out.println(teade);
             socketWriter.write(teade);
             socketWriter.newLine();
