@@ -3,6 +3,7 @@ package client;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.*;
 import javafx.stage.Stage;
@@ -69,10 +70,13 @@ public class Client extends Application {
         BorderPane bp = new BorderPane();
         Button sendButtpon = new Button("Send message");
         TextField sisestus = new TextField();
+        TextArea kast = new TextArea();
+        kast.setDisable(true);
         sisestus.setPrefWidth(500.0);
-        HBox hbox = new HBox();
-        hbox.getChildren().addAll(sisestus,sendButtpon);
-        bp.setBottom(hbox);
+        HBox bottom = new HBox();
+        bottom.getChildren().addAll(sisestus,sendButtpon);
+        bp.setCenter(kast);
+        bp.setBottom(bottom);
 
         scene = new Scene(bp,600,600);
         window.setScene(scene);
