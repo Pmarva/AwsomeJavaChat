@@ -61,7 +61,7 @@ public class ClientHandler implements Runnable {
 
     /**
      * Method for handling client commands.
-     * Input is line from client.
+     * Input line from client.
      */
     private void clientMessages() {
 

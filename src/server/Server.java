@@ -9,7 +9,6 @@ import java.util.ArrayList;
  * class to initalize basic IRC server and start it.
  * @author Marva
  * @since java 1.8
- *
  */
 public class Server {
     private ArrayList<User> clients = new ArrayList<User>();

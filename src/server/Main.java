@@ -7,7 +7,7 @@ import java.net.BindException;
  */
 public class Main {
     public static void main(String[] args) {
-        Server server = new Server("192.168.43.239", 6667);
+        Server server = new Server("127.0.0.1", 6667);
         try {
             server.start();
         } catch (BindException e) {
